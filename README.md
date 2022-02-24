@@ -25,6 +25,6 @@ Tests
 npm test
 
 Usage
-https://drive.google.com/file/d/1bdYnCM7HiesIckdLZmU6JKFdy1Ll5kL0/view
+![Untitled_ Feb 23, 2022 10_15 PM](https://user-images.githubusercontent.com/87239985/155451359-53fc0fa9-cb5c-459a-b795-2c426065238e.gif)
 
 Questions
