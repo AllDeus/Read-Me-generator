@@ -1,145 +1,147 @@
-const fs = require("fs");
-const path = require("path");
-const axios = require("axios");
-const inquirer = require("inquirer");
+// require modules 
+const fs = require('fs');
+const inquirer = require('inquirer');
 
+// linking to page where the README is developed 
+const generatePage = require('./utils/generateMarkdown.js');
 
+// array of questions for user
+const questions = () => {
+    // using inquirer to prompt questions to user 
+    return inquirer.prompt([
+        {
+            type: 'input',
+            name: 'github',
+            message: 'What is your GitHub username?',
+            validate: nameInput => {
+                if (nameInput) {
+                    return true;
+                } else {
+                    console.log('Please enter your GitHub username!');
+                    return false;
+                }
+            }
+        },
+        {
+            type: 'input',
+            name: 'email',
+            message: 'What is your email address?',
+            validate: nameInput => {
+                if (nameInput) {
+                    return true;
+                } else {
+                    console.log('Please enter your email address!');
+                    return false;
+                }
+            }
 
-const questions = [
-    {
-        type: "input",
-        message: "What is your github username?",
-        name: "username"
-    },
-    {
-        type: "input",
-        message: "What is the project title?",
-        name: "title"
-    },
-    {
-        type: "input",
-        message: "What is the project description?",
-        name: "description"
-    },
-    {
-        type: "checkbox",
-        message: "What are the contents?",
-        name: "table",
-        choices: ['Installation', 'Usage', 'License', 'Contributing', 'Tests', 'Questions']
-    },
-    {
-        type: "input",
-        message: "what step by steps of installation?",
-        name: "installation"
-    },
-    {
-        type: "input",
-        message: "what is the usage?",
-        name: "usage"
-    },
-    {
-        type: "list",
-        message: "what license should the project have?",
-        name: "license",
-        choices: [
-            'MIT',
-            'GNU',
-            'Apache'
-        ]
-    },
-    {
-        type: "input",
-        message: "who is contributing? (please list contributors' github usernames separated by commas)",
-        name: "contributing"
-    },
-    {
-        type: "input",
-        message: "Please write details of the testing procedures",
-        name: "tests"
-    }
-];
+        },
+        {
+            type: 'input',
+            name: 'title',
+            message: 'What is your project name?',
+            validate: nameInput => {
+                if (nameInput) {
+                    return true;
+                } else {
+                    console.log('Please enter your project name!');
+                    return false;
+                }
+            }
+        },
+        {
+            type: 'input',
+            name: 'description',
+            message: 'Please write a short description of your project.',
+            validate: nameInput => {
+                if (nameInput) {
+                    return true;
+                } else {
+                    console.log('Please enter a description of your project!');
+                    return false;
+                }
+            }
+        },
+        {
+            type: 'list',
+            name: 'license',
+            message: 'What kind of license should your project have?',
+            choices: ['MIT', 'GNU'],
+            default: ["MIT"],
+            validate: nameInput => {
+                if (nameInput) {
+                    return true;
+                } else {
+                    console.log('Please choose a license!');
+                    return false;
+                }
+            }
+        },
+        {
+            type: 'input',
+            name: 'install',
+            message: 'What are the steps required to install your project?',
+            validate: nameInput => {
+                if (nameInput) {
+                    return true;
+                } else {
+                    console.log('Please enter steps required to install your project!');
+                    return false;
+                }
+            }
+        },
+        {
+            type: 'input',
+            name: 'usage',
+            message: 'How do you use this app?',
+            validate: nameInput => {
+                if (nameInput) {
+                    return true;
+                } else {
+                    console.log('Please enter a usage description!');
+                    return false;
+                }
+            }
+        },
+        {
+            type: 'input',
+            name: 'test',
+            message: 'What command should be run to run tests?',
+            default: 'npm test'
+        },
+        {
+            type: 'input',
+            name: 'contributors',
+            message: 'What does the user need to know about contributing to the repo?'
+        }
+    ]);
+};
 
-function writeToFile(data) {
-    console.log(data)
-
-    let githubCont = data.contributing.split(',')
-    let githubUser = [];
-    githubCont.map(user => githubUser.push(user.trim()))
-    let githubUserStr = '';
-    githubUser.map(user => {
-        githubUserStr += `[${user}]('https://github.com/${user}') \n`
-    })
-    console.log(githubCont)
-
-    let content = '';
-
-    data.table.map(stuff => {
-        content += `* [${stuff}](#${stuff.toLowerCase()}) \n \n`
-    })
-
-    let license = data.license === 'MIT' ? "[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)]" : data.license === 'GNU' ?
-        "[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)]" : "[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)]"
-
-    let fileTxt = `
-# ${data.title}
-${license}(${data.html_url})
-## Description
-
-${data.description}
-
-## Table of Contents
-${content}
-## Installation
-
-To install necessary dependencies, run the following command:
-
-${data.installation}
-
-## Usage
-
-${data.usage}
-
-## License
-
-This project is licensed under the ${data.license} license.
-  
-## Contributing
-
-${githubUserStr}
-## Tests
-
-To run tests, run the following command:
-
-npm test
-
-## Questions
-
-<img src="${data.avatar_url}" alt="avatar" style="border-radius: 16px" width="30" />
-
-If you have any questions about the repo, open an issue or contact [${data.login}](${data.html_url}) directly at ${data.blog}.
-`
-
-    fs.writeFile(`${data.title}.md`, fileTxt, function (err) {
+// function to write README file using file system 
+const writeFile = data => {
+    fs.writeFile('README.md', data, err => {
+        // if there is an error 
         if (err) {
             console.log(err);
-            throw err;
+            return;
+            // when the README has been created 
         } else {
-            console.log('Success!')
+            console.log("Your README has been successfully created!")
         }
     })
 };
 
-
-function init() {
-    inquirer
-        .prompt(questions)
-        .then(response => {
-            console.log(response)
-            axios.get(`https://api.github.com/users/${response.username}`).then(data => {
-                writeToFile({ ...response, ...data.data })
-            }).catch(err => console.log(err))
-        })
-        .catch(err => console.log(err))
-}
-
-init();
+// function call to initialize program
+questions()
+    // getting user answers 
+    .then(answers => {
+        return generatePage(answers);
+    })
+    // using data to display on page 
+    .then(data => {
+        return writeFile(data);
+    })
+    // catching errors 
+    .catch(err => {
+        console.log(err)
+    })

@@ -1,7 +1,7 @@
 {
-    "name": "readme-generator",
+    "name": "static-site",
     "version": "1.0.0",
-    "description": "dynamically application that for generates a README.md from a user's input.",
+    "description": "",
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
